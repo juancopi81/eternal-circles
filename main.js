@@ -144,9 +144,27 @@ function draw() {
 
 	// Show created discs
 	push();
+
 	for (let i = 0; i < discs.length; i++) {
 		
 		discs[i].show();
+
+		// Check if tile is in the inner circle
+		for (let j = 0; j < tiles.length; j++) {
+			if (discs[i].contains(tiles[j].x + tileSize / 2, tiles[j].y + tileSize / 2)) {
+				discs[i].activate();
+				break;
+			} else {
+				if (!discs[i].releasedInside) {
+					discs[i].deactivate();
+				}
+			}
+		}
+
+		if (discs[i].isActive == true) {
+			console.log(Tone.Transport.getTicksAtTime());
+			discs[i].drawNotes(discs[i].notes, Tone.Transport.getTicksAtTime());
+		}
 	}
 	pop();
 }
@@ -158,19 +176,36 @@ function mousePressed() {
 }
 
 function mouseReleased() {
-	for (let i = 0; i < tiles.length; i++) {
-		
+
+	for (let j = 0; j < tiles.length; j++) {
+		for (let i = 0; i < discs.length; i++) {
+
+			if (discs[i].contains(tiles[j].x + tileSize / 2, tiles[j].y + tileSize / 2)) {
+				discs[i].releasedInside = true;
+				discs[i].notes = tiles[j].notes;
+			}
+		}
+
 		// See if left or right side
-		if (i >= numInterpolations / 2) {
+		if (j >= numInterpolations / 2) {
 			side = -1
 		} else {
 			side = 1
 		}
+
+		// Send it back to its original position
+		tiles[j].x = ((width - tileSize) * Math.floor(j/4)) + ((horizontalDiv / 2) * side);
+		tiles[j].y = 30 + (tileSize * (j % 4));
 		
-		tiles[i].x = ((width - tileSize) * Math.floor(i/4)) + ((horizontalDiv / 2) * side);
-		tiles[i].y = 30 + (tileSize * (i % 4));
-		
-		tiles[i].notPressed();
+		tiles[j].notPressed();
+	}
+}
+
+function doubleClicked() {
+	for (let i = 0; i < discs.length; i++) {
+		if (discs[i].contains(mouseX, mouseY)) {
+			discs[i].deactivate();
+		}
 	}
 }
 
@@ -211,7 +246,6 @@ let melodiesVaeLoaded = melodiesVae.initialize();
 async function interpolateMelodies() {
 	await melodiesVaeLoaded;
 	interpolatedMelodies = await melodiesVae.interpolate([presetMelodies['MELODY1'], presetMelodies['MELODY2']], numInterpolations);
-	console.log(interpolatedMelodies);
 }
 
 interpolateMelodies();

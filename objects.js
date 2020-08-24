@@ -11,14 +11,81 @@ class Disc {
 		this.x = x;
 		this.y = y;
 		this.r = r;
+
+		this. brightness = 30;
+
+		this.isActive = false;
+
+		this.releasedInside = false;
+
+		this.notes = [];
+	}
+
+	activate() {
+		this.brightness = 255;
+		this.isActive = true;
+	}
+
+	deactivate() {
+		this.brightness = 30;
+		this.isActive = false;
+		this.notes = [];
+		this.releasedInside = false;
 	}
 
 	show() {
 
-		fill(255, 236, 204, 30);
+		fill(255, 236, 204, this.brightness);
 		ellipse(this.x, this.y, this.r);
 		fill(0);
 		ellipse(this.x, this.y, this.r / 4);
+	}
+
+	// Function to draw the melodies, taken from: 
+	// https://medium.com/@torinblankensmith/melody-mixer-using-deeplearn-js-to-mix-melodies-in-the-browser-8ad5b42b4d0b
+	drawNotes(notes, speed) {
+		
+		push();
+		angleMode(DEGREES); // Change angle from radians to degrees
+		let angle = 0;
+
+		translate(this.x, this.y);
+
+		this.notes = notes;
+
+		let radius = this.r / 2;
+
+		var cellWidth = radius / NUM_STEPS;
+		var cellHeigth = radius / NUM_NOTES;
+
+		stroke(135, 0, 88);
+		strokeWeight(2);
+
+		this.notes.forEach(function(note) {
+
+			let steps = 360 / notes.length;
+
+			let rx = (radius - radius / 3) * cos(angle + speed / 16);
+			let ry = - radius / 2 + (cellHeigth * (note.pitch - MIDI_START_NOTE)) + (radius - radius / 3) * sin(angle + speed / 16);
+			let rw = (cellWidth * (note.quantizedEndStep - note.quantizedStartStep));
+			let rh = cellHeigth;
+			rect(rx, ry, rw, rh);
+			angle += steps;
+		}); 
+		pop();
+	}
+
+	// Check if an element is in the inner circle
+	contains(px, py) {
+
+		// Calculate distance between the center of the circle and other point
+		let d = dist(px, py, this.x, this.y) 
+
+		if (d < this.r / 2) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
 
@@ -83,7 +150,7 @@ class Tile {
 		ht = this.h;
 
 		this.notes.forEach(function(note) {
-			var emptyNoteSpacer = 2;
+			var emptyNoteSpacer = 5;
 			rect(emptyNoteSpacer + cellWidth * note.quantizedStartStep, ht - cellHeigth * (note.pitch - MIDI_START_NOTE),
 				cellWidth * (note.quantizedEndStep - note.quantizedStartStep) - emptyNoteSpacer, cellHeigth);
 		}); 
