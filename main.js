@@ -22,13 +22,62 @@ const numDiscs = 4;
 let discs = [];
 let tiles = [];
 
+// Sampler
+let mSampler;
+let samplerPattern;
+let samplerParts = [];
+
+
 function setup() {
+
+	const sampler = new Tone.Sampler({
+			urls: {
+				A0: "A0.mp3",
+				C1: "C1.mp3",
+				"D#1": "Ds1.mp3",
+				"F#1": "Fs1.mp3",
+				A1: "A1.mp3",
+				C2: "C2.mp3",
+				"D#2": "Ds2.mp3",
+				"F#2": "Fs2.mp3",
+				A2: "A2.mp3",
+				C3: "C3.mp3",
+				"D#3": "Ds3.mp3",
+				"F#3": "Fs3.mp3",
+				A3: "A3.mp3",
+				C4: "C4.mp3",
+				"D#4": "Ds4.mp3",
+				"F#4": "Fs4.mp3",
+				A4: "A4.mp3",
+				C5: "C5.mp3",
+				"D#5": "Ds5.mp3",
+				"F#5": "Fs5.mp3",
+				A5: "A5.mp3",
+				C6: "C6.mp3",
+				"D#6": "Ds6.mp3",
+				"F#6": "Fs6.mp3",
+				A6: "A6.mp3",
+				C7: "C7.mp3",
+				"D#7": "Ds7.mp3",
+				"F#7": "Fs7.mp3",
+				A7: "A7.mp3",
+				C8: "C8.mp3"
+			},
+			release: 1,
+			baseUrl: "https://tonejs.github.io/audio/salamander/"
+		}).toDestination();
 
 	createCanvas(windowWidth, windowHeight);
 	
 	// Div for vertical and horizontal div of the page
 	verticalDiv = windowHeight / 10;
 	horizontalDiv = windowWidth / 10;
+
+	// setup slider
+    slider = createSlider(60, 140, 98);
+    slider.position(width/2 - 40, 40);
+    slider.style('width', '80px');
+    slider.input(updateBPM);
 
 	// Calculate the tile and disc sizes 
 	tileSize = windowHeight / 5;
@@ -64,8 +113,12 @@ function setup() {
 		let y = horizontalDiv * 2;
 		let r = discSize;
 		
+		// Add random angles to draw the notes in the discs
+		let randomAngleX = Math.floor(Math.random() * (12 - 7)) + 6;
+	    let randomAngleY = Math.floor(Math.random() * (12 - 7)) + 6;
+		
 		// Create disc and add it to array
-		let d = new Disc(x, y, r);
+		let d = new Disc(x, y, r, randomAngleX, randomAngleY);
 		discs.push(d);
 	}
 
@@ -92,6 +145,35 @@ function setup() {
 		tiles.push(t);
 	}
 
+	// Create Sampler of the melody
+    mSampler = new Tone.Sampler({
+    	urls: {
+    		'A6': 'A.wav'
+    	},
+    	volume: -20
+    });
+
+    // Add Sampler to destination
+    let reverb = new Tone.Reverb({decay: 3, wet: 0.1}).toDestination();
+	mSampler.connect(reverb);
+
+	mSampler.toDestination();
+
+	// Create parts to each disc using the same sampler
+	for (let i = 0; i < discs.length; i++) {
+
+		samplerParts[i] = new Tone.Part((time, note) => {
+			sampler.triggerAttackRelease(note, '2n', time);
+		}, samplerPattern).start();
+
+		samplerParts[i].loop = true;
+		samplerParts[i].loopStart = 0;
+		samplerParts[i].loopEnd = '2m';
+	}
+}
+
+function updateBPM() {
+	Tone.Transport.bpm.value = slider.value();
 }
 
 function draw() {
@@ -99,6 +181,13 @@ function draw() {
 	
 	// Just paint the lines 
 	background(0);
+
+	// Text for the slider
+	push();
+	fill(255);
+	textSize(12);
+	text('BPM: ' + slider.value(), width/2 - 20, 30);
+	pop();
 
 	// Draw pedal wave
 	const waveArray = waveForm.getValue();
@@ -162,7 +251,6 @@ function draw() {
 		}
 
 		if (discs[i].isActive == true) {
-			console.log(Tone.Transport.getTicksAtTime());
 			discs[i].drawNotes(discs[i].notes, Tone.Transport.getTicksAtTime());
 		}
 	}
@@ -170,8 +258,42 @@ function draw() {
 }
 
 function mousePressed() {
+
+	// Check if mouse was pressed over the tile so it can start dragging
 	for (let i = 0; i < tiles.length; i++) {
 		tiles[i].pressed(mouseX, mouseY);
+	}
+
+	// Check if mouse was pressed over the center of the tile, reverse melody
+	for (let j = 0; j < discs.length; j++) {
+		if (discs[j].containsInner(mouseX, mouseY)) {
+			
+			// Create a copy of the array
+			var reverseNotes = JSON.parse(JSON.stringify(discs[j].notes)).reverse();
+
+			let startStep = 0;
+
+			// Reverse the order of the melody
+			for (note of reverseNotes) {
+				duration = note.quantizedEndStep - note.quantizedStartStep;
+				note.quantizedStartStep = startStep;
+				note.quantizedEndStep = startStep + duration;
+				startStep = note.quantizedEndStep;
+			}
+
+			discs[j].notes = reverseNotes;
+			samplerParts[j].clear();
+
+			// Add new melody to Tone
+			for (let note of discs[j].notes) {
+				let noteName = Tone.Frequency(note.pitch, 'midi').toNote();
+				samplerParts[j].at(
+					{'16n': note.quantizedStartStep},
+					noteName
+				);
+			}
+
+		}
 	}
 }
 
@@ -183,6 +305,14 @@ function mouseReleased() {
 			if (discs[i].contains(tiles[j].x + tileSize / 2, tiles[j].y + tileSize / 2)) {
 				discs[i].releasedInside = true;
 				discs[i].notes = tiles[j].notes;
+
+				for (let note of tiles[j].notes) {
+					let noteName = Tone.Frequency(note.pitch, 'midi').toNote();
+					samplerParts[i].at(
+						{'16n': note.quantizedStartStep},
+						noteName
+					);
+				}
 			}
 		}
 
@@ -205,6 +335,7 @@ function doubleClicked() {
 	for (let i = 0; i < discs.length; i++) {
 		if (discs[i].contains(mouseX, mouseY)) {
 			discs[i].deactivate();
+			samplerParts[i].clear();
 		}
 	}
 }

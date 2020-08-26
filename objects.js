@@ -7,10 +7,12 @@ let ht = 0;
 // Class for the disc 
 class Disc {
 
-	constructor(x, y, r) {
+	constructor(x, y, r, randomAngleX, randomAngleY) {
 		this.x = x;
 		this.y = y;
 		this.r = r;
+		this.randomAngleX = randomAngleX;
+		this.randomAngleY = randomAngleY;
 
 		this. brightness = 30;
 
@@ -19,6 +21,8 @@ class Disc {
 		this.releasedInside = false;
 
 		this.notes = [];
+
+		// Random angles
 	}
 
 	activate() {
@@ -61,12 +65,16 @@ class Disc {
 		stroke(135, 0, 88);
 		strokeWeight(2);
 
+		let randomAngleX = this.randomAngleX;
+		let randomAngleY = this.randomAngleY;
+
+
 		this.notes.forEach(function(note) {
 
 			let steps = 360 / notes.length;
 
-			let rx = (radius - radius / 3) * cos(angle + speed / 16);
-			let ry = - radius / 2 + (cellHeigth * (note.pitch - MIDI_START_NOTE)) + (radius - radius / 3) * sin(angle + speed / 16);
+			let rx = (radius + radius / 3) * cos(angle - speed / randomAngleX);
+			let ry = - radius / 2 + (cellHeigth * (note.pitch - MIDI_START_NOTE)) + (radius + radius / 3) * sin(angle - speed / randomAngleY);
 			let rw = (cellWidth * (note.quantizedEndStep - note.quantizedStartStep));
 			let rh = cellHeigth;
 			rect(rx, ry, rw, rh);
@@ -75,13 +83,26 @@ class Disc {
 		pop();
 	}
 
-	// Check if an element is in the inner circle
+	// Check if an element is in the circle
 	contains(px, py) {
 
 		// Calculate distance between the center of the circle and other point
 		let d = dist(px, py, this.x, this.y) 
 
 		if (d < this.r / 2) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// Check if an element is in the inner circle
+	containsInner(px, py) {
+
+		// Calculate distance between the center of the circle and other point
+		let d = dist(px, py, this.x, this.y) 
+
+		if (d < this.r / 8) {
 			return true;
 		} else {
 			return false;
