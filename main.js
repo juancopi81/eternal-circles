@@ -23,14 +23,26 @@ let discs = [];
 let tiles = [];
 
 // Sampler
-let mSampler;
+let xSamplers = [];
+let pSamplers = [];
 let samplerPattern;
 let samplerParts = [];
+let reverbs = [];
 
 
 function setup() {
 
-	const sampler = new Tone.Sampler({
+	// Position of settings button 
+	let settingsIcon = createElement('i');
+    settingsIcon.addClass('fa fa-cog fa-2x');
+    settingsIcon.position(10, 40);
+    settingsIcon.id('modalBtn');
+
+	// Start the samplers
+
+	for (let i = 0; i < numDiscs; i++) {
+
+		pSamplers[i] = new Tone.Sampler({
 			urls: {
 				A0: "A0.mp3",
 				C1: "C1.mp3",
@@ -67,6 +79,23 @@ function setup() {
 			baseUrl: "https://tonejs.github.io/audio/salamander/"
 		}).toDestination();
 
+		// Create Xylphone Sampler of the melody
+	    xSamplers[i] = new Tone.Sampler({
+	    	urls: {
+	    		'A6': 'A.wav'
+	    	},
+	    	volume: -20
+	    });
+
+	    // Add Sampler to destination
+	    reverbs[i] = new Tone.Reverb({decay: 3, wet: 0.1}).toDestination();
+		xSamplers[i].connect(reverbs[i]);
+
+		xSamplers[i].toDestination();
+	}
+
+
+
 	createCanvas(windowWidth, windowHeight);
 	
 	// Div for vertical and horizontal div of the page
@@ -85,7 +114,7 @@ function setup() {
 
 	background(0);
 
-	// Button to control start/stop of sound 
+	// Button to control start/stop of sound and setting of the app
 	startButton = createButton('Start');
     startButton.position(windowWidth / 2, windowHeight - 2 * verticalDiv); 
     startButton.mousePressed(startPedal);
@@ -145,30 +174,29 @@ function setup() {
 		tiles.push(t);
 	}
 
-	// Create Sampler of the melody
-    mSampler = new Tone.Sampler({
-    	urls: {
-    		'A6': 'A.wav'
-    	},
-    	volume: -20
-    });
-
-    // Add Sampler to destination
-    let reverb = new Tone.Reverb({decay: 3, wet: 0.1}).toDestination();
-	mSampler.connect(reverb);
-
-	mSampler.toDestination();
-
 	// Create parts to each disc using the same sampler
 	for (let i = 0; i < discs.length; i++) {
 
-		samplerParts[i] = new Tone.Part((time, note) => {
-			sampler.triggerAttackRelease(note, '2n', time);
-		}, samplerPattern).start();
+		if (discs[i].instrument == 'Piano') {
 
-		samplerParts[i].loop = true;
-		samplerParts[i].loopStart = 0;
-		samplerParts[i].loopEnd = '2m';
+			samplerParts[i] = new Tone.Part((time, note) => {
+				pSamplers[i].triggerAttackRelease(note, '2n', time);
+			}, samplerPattern).start();
+
+			samplerParts[i].loop = true;
+			samplerParts[i].loopStart = 0;
+			samplerParts[i].loopEnd = '2m';
+				
+		} else {
+
+			samplerParts[i] = new Tone.Part((time, note) => {
+				xSamplers[i].triggerAttackRelease(note, '2n', time);
+			}, samplerPattern).start();
+
+			samplerParts[i].loop = true;
+			samplerParts[i].loopStart = 0;
+			samplerParts[i].loopEnd = '2m';
+		}
 	}
 }
 
@@ -186,6 +214,7 @@ function draw() {
 	push();
 	fill(255);
 	textSize(12);
+	textFont('Roboto Mono');
 	text('BPM: ' + slider.value(), width/2 - 20, 30);
 	pop();
 
@@ -340,6 +369,31 @@ function doubleClicked() {
 	}
 }
 
+function mouseWheel(event) {
+	let delta = event.delta;
+	let mVolume = 0;
+	for (let i = 0; i < discs.length; i++) {
+
+		if (discs[i].contains(mouseX, mouseY)) {
+			mVolume += (delta / 60);
+			
+			if (mVolume < -60) {
+				mVolume = -60;
+			} else if (mVolume > 0) {
+				mVolume = 0;
+			} 
+
+			discs[i].volume = mVolume;
+
+			if (discs[i].instrument == 'Piano') {
+				pSamplers[i].volume.value = discs[i].volume;
+			} else {
+				xSamplers[i].volume.value = discs[i].volume;
+			}
+		}
+	}
+}
+
 
 async function startPedal() {
 
@@ -374,9 +428,70 @@ let melodiesVae = new music_vae.MusicVAE(checkPoint);
 let melodiesVaeLoaded = melodiesVae.initialize();
 
 // Interpolate the given melodies 
-async function interpolateMelodies() {
+async function interpolateMelodies(callback) {
 	await melodiesVaeLoaded;
 	interpolatedMelodies = await melodiesVae.interpolate([presetMelodies['MELODY1'], presetMelodies['MELODY2']], numInterpolations);
+	callback();
 }
 
-interpolateMelodies();
+function melodiesReady() {
+	let bStart = document.getElementById('progress');
+	bStart.innerHTML = 'START';
+	bStart.style.cursor = 'pointer';
+	bStart.addEventListener('click', () => {
+		document.getElementById('loading').style.display = 'none';
+	})
+}
+
+interpolateMelodies(melodiesReady);
+
+// Javascript to handel the modal -> setting changed by the user
+document.addEventListener('DOMContentLoaded', () => {
+
+	// Get modal div
+	var modal = document.getElementById("settingModal");
+
+	// Add event listener when button is clicked
+	let modalSendBtn = document.getElementById('modalSendBtn');
+
+	// When button is clicked
+	modalSendBtn.addEventListener('click', () => {
+
+		// Loop over the values assigned to the discs
+		for (let i = 1; i < discs.length + 1; i++) {
+			discs[i - 1].volume = document.getElementById('volumeDisc' + i).value;
+			discs[i - 1].instrument = document.getElementById('instrument' + i).value;
+			discs[i - 1].deactivate();
+			samplerParts[i - 1].clear();
+
+			// Update instruments and volume of the discs
+			if (discs[i - 1].instrument == 'Piano') {
+				pSamplers[i - 1].volume.value = discs[i - 1].volume;
+
+				samplerParts[i - 1] = new Tone.Part((time, note) => {
+					pSamplers[i - 1].triggerAttackRelease(note, '2n', time);
+				}, samplerPattern).start();
+
+				samplerParts[i - 1].loop = true;
+				samplerParts[i - 1].loopStart = 0;
+				samplerParts[i - 1].loopEnd = '2m';
+
+			} else {
+				xSamplers[i - 1].volume.value = discs[i - 1].volume;
+
+					samplerParts[i - 1] = new Tone.Part((time, note) => {
+					xSamplers[i - 1].triggerAttackRelease(note, '2n', time);
+				}, samplerPattern).start();
+
+				samplerParts[i - 1].loop = true;
+				samplerParts[i - 1].loopStart = 0;
+				samplerParts[i - 1].loopEnd = '2m';
+
+			}
+		}
+
+		// Hide modal menu
+		modal.style.display = "none";
+	});
+
+});

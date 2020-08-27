@@ -22,6 +22,10 @@ class Disc {
 
 		this.notes = [];
 
+		this.volume = 0;
+
+		this.instrument = 'Piano';
+
 		// Random angles
 	}
 

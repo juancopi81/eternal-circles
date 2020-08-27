@@ -12,6 +12,12 @@
     	<!-- import the webpage's stylesheet -->
     	<link rel="stylesheet" href="/style.css">
 
+        <!-- Add fontawesome icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <!-- Use font roboto mono -->
+        <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+        
     	<!-- Required js libraries -->
     	<!-- Import p5 library-->
     	<script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
@@ -29,5 +35,133 @@
 
 	</head>
 	<body>
+
+        <!-- Loading div -->
+        <div id="loading" class="modal">
+            <div class="loading-content">
+                <hr class="solid">
+                <h2>ETERNAL CIRCLES</h2>
+                <hr class="solid">
+
+                <div class="loading-explain">
+                    <p>Please be sure to use your headphones</p>
+                    <p>Drag and Drop the melodies of the tiles into the Discs</p>
+                    <p>Double click inside the Discs to remove a meloy</p>
+                    <p>Click inside the center of each circle to play the melody backwards</p>
+                    <p>Use the mouse wheel inside the Discs to change their volume</p>
+                    <p>Visit the settings to change the defaults</p>                    
+                </div>
+
+                <hr class="solid">
+                <div class="dots">
+                    <h2 id="progress">LOADING<span>.</span><span>.</span><span>.</span></h2>
+                </div>
+                <hr class="solid">
+
+                <div class="loading-explain">
+                    <p>Built with <a href="https://tonejs.github.io/">Tone.js</a> + <a href="https://p5js.org/">P5.js</a> + <a href="https://github.com/magenta/magenta-js">Magenta.js</a></p>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- The Modal -->
+        <div id="settingModal" class="modal">
+
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Settings</h2>
+                <hr class="solid">
+                <p>Change the default values of each of the four discs (from left to rigth)</p>
+                <h3>Disc 1</h3>
+                <p>
+                    <span>Volume</span>
+                    <input type="range" name="volumeDisc1" id="volumeDisc1" min="-60" max="0" value="0">
+                    <label for="instrument1">Instrument</label>
+                    <select id="instrument1" name="instrument1">
+                        <option>Piano</option>
+                        <option>Xylophone</option>
+                    </select>
+                </p>
+                <h3>Disc 2</h3>
+                <p>
+                    <span>Volume</span>
+                    <input type="range" name="volumeDisc2" id="volumeDisc2" min="-60" max="0" value="0">
+                    <label for="instrument2">Instrument</label>
+                    <select id="instrument2" name="instrument2">
+                        <option>Piano</option>
+                        <option>Xylophone</option>
+                    </select>
+                </p>
+                <h3>Disc 3</h3>
+                <p>
+                    <span>Volume</span>
+                    <input type="range" name="volumeDisc3" id="volumeDisc3" min="-60" max="0" value="0">
+                    <label for="instrument3">Instrument</label>
+                    <select id="instrument3" name="instrument3">
+                        <option>Piano</option>
+                        <option>Xylophone</option>
+                    </select>
+                </p>
+                <h3>Disc 4</h3>
+                <p>
+                    <span>Volume</span>
+                    <input type="range" name="volumeDisc4" id="volumeDisc4" min="-60" max="0" value="0">
+                    <label for="instrument4">Instrument</label>
+                    <select id="instrument4" name="instrument1">
+                        <option>Piano</option>
+                        <option>Xylophone</option>
+                    </select>
+                </p>
+                <hr class="solid">
+                <p>Use the default seed melodies or generate new ones with AI (Magenta MusicRNN)</p>
+                <h3>Seed Melody 1</h3>
+                <label for="melody1">Which melody would you like to use?</label>
+                <select id="melody1" name="melody1">
+                    <option>Use Default</option>
+                    <option>Generate a new one with Magenta</option>
+                </select>
+                <h3>Seed Melody 2</h3>
+                <label for="melody2">Which melody would you like to use?</label>
+                <select id="melody2" name="melody2">
+                    <option>Use Default</option>
+                    <option>Generate a new one with Magenta</option>
+                </select>
+                <hr class="solid">
+                <button id="modalSendBtn">Send</button>
+            </div>
+
+        </div>
+        <script>
+            // Get the modal
+            window.onload = function() {
+
+                var modal = document.getElementById("settingModal");
+
+                // Get the button that opens the modal
+                var btn = document.getElementById("modalBtn");
+
+                // Get the <span> element that closes the modal
+                var span = document.getElementsByClassName("close")[0];
+
+                // When the user clicks the button, open the modal 
+                btn.onclick = function() {
+                  modal.style.display = "block";
+                }
+
+                // When the user clicks on <span> (x), close the modal
+                span.onclick = function() {
+                  modal.style.display = "none";
+                }
+
+                // When the user clicks anywhere outside of the modal, close it
+                window.onclick = function(event) {
+                  if (event.target == modal) {
+                    modal.style.display = "none";
+                  }
+                }
+            }
+        </script>
 	</body>
 </html>
