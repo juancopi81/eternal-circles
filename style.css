@@ -150,3 +150,44 @@ i {
      */
     animation-delay: .4s;
 }
+
+.melodyPrepClass {
+    display: none;
+    color: #FF0A0A;
+}
+
+.melodyPrepClassActive {
+    display: inline;
+    color: #FF0A0A;
+}
+
+/* Create four equal columns that floats next to each other */
+.column {
+    float: left;
+    width: 20%;
+    padding: 10px;
+}
+
+.col2 {
+    float: left;
+    width: 40%;
+    padding: 10px;
+} 
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+    margin-bottom: 20px;
+}
+
+body.waiting {
+    cursor: wait;
+}
+
+.centerModal {
+    display: flex;
+    justify-content: center
+}
+

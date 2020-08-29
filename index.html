@@ -28,6 +28,7 @@
         <script src="https://cdn.jsdelivr.net/npm/@magenta/music@^1.19.0/es6/core.js"></script>
         <!--Model we want to use -->
         <script src="https://cdn.jsdelivr.net/npm/@magenta/music@^1.19.0/es6/music_vae.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@magenta/music@^1.19.0/es6/music_rnn.js"></script>
     	<!-- Import the webpage's javascript file and preset melodies-->
         <script type="text/javascript" src="./melodies.js"></script>
         <script type="text/javascript" src="./objects.js"></script>
@@ -46,7 +47,7 @@
                 <div class="loading-explain">
                     <p>Please be sure to use your headphones</p>
                     <p>Drag and Drop the melodies of the tiles into the Discs</p>
-                    <p>Double click inside the Discs to remove a meloy</p>
+                    <p>Double click inside the Discs to remove a melody</p>
                     <p>Click inside the center of each circle to play the melody backwards</p>
                     <p>Use the mouse wheel inside the Discs to change their volume</p>
                     <p>Visit the settings to change the defaults</p>                    
@@ -74,62 +75,90 @@
                 <h2>Settings</h2>
                 <hr class="solid">
                 <p>Change the default values of each of the four discs (from left to rigth)</p>
-                <h3>Disc 1</h3>
-                <p>
-                    <span>Volume</span>
-                    <input type="range" name="volumeDisc1" id="volumeDisc1" min="-60" max="0" value="0">
-                    <label for="instrument1">Instrument</label>
-                    <select id="instrument1" name="instrument1">
-                        <option>Piano</option>
-                        <option>Xylophone</option>
-                    </select>
-                </p>
-                <h3>Disc 2</h3>
-                <p>
-                    <span>Volume</span>
-                    <input type="range" name="volumeDisc2" id="volumeDisc2" min="-60" max="0" value="0">
-                    <label for="instrument2">Instrument</label>
-                    <select id="instrument2" name="instrument2">
-                        <option>Piano</option>
-                        <option>Xylophone</option>
-                    </select>
-                </p>
-                <h3>Disc 3</h3>
-                <p>
-                    <span>Volume</span>
-                    <input type="range" name="volumeDisc3" id="volumeDisc3" min="-60" max="0" value="0">
-                    <label for="instrument3">Instrument</label>
-                    <select id="instrument3" name="instrument3">
-                        <option>Piano</option>
-                        <option>Xylophone</option>
-                    </select>
-                </p>
-                <h3>Disc 4</h3>
-                <p>
-                    <span>Volume</span>
-                    <input type="range" name="volumeDisc4" id="volumeDisc4" min="-60" max="0" value="0">
-                    <label for="instrument4">Instrument</label>
-                    <select id="instrument4" name="instrument1">
-                        <option>Piano</option>
-                        <option>Xylophone</option>
-                    </select>
-                </p>
+                <div class="row">
+                    
+                    <div class="column">
+                        <h3>Disc 1</h3>
+                        <span>Volume</span>
+                        <input type="range" name="volumeDisc1" id="volumeDisc1" min="-60" max="0" value="0">
+                        <label for="instrument1">Instrument</label>
+                        <select id="instrument1" name="instrument1">
+                            <option>Piano</option>
+                            <option>Xylophone</option>
+                        </select>
+                    </div>
+                    
+                    <div class="column">
+                        <h3>Disc 2</h3>
+                        <span>Volume</span>
+                        <input type="range" name="volumeDisc2" id="volumeDisc2" min="-60" max="0" value="0">
+                        <label for="instrument2">Instrument</label>
+                        <select id="instrument2" name="instrument2">
+                            <option>Piano</option>
+                            <option>Xylophone</option>
+                        </select>
+                    </div>
+
+                    <div class="column">
+                        <h3>Disc 3</h3>
+                        <span>Volume</span>
+                        <input type="range" name="volumeDisc3" id="volumeDisc3" min="-60" max="0" value="0">
+                        <label for="instrument3">Instrument</label>
+                        <select id="instrument3" name="instrument3">
+                            <option>Piano</option>
+                            <option>Xylophone</option>
+                        </select>
+                    </div>
+                    
+                    <div class="column">
+                        <h3>Disc 4</h3>
+                        <span>Volume</span>
+                        <input type="range" name="volumeDisc4" id="volumeDisc4" min="-60" max="0" value="0">
+                        <label for="instrument4">Instrument</label>
+                        <select id="instrument4" name="instrument1">
+                            <option>Piano</option>
+                            <option>Xylophone</option>
+                        </select>
+                    </div>
+
+                </div>
+
                 <hr class="solid">
                 <p>Use the default seed melodies or generate new ones with AI (Magenta MusicRNN)</p>
-                <h3>Seed Melody 1</h3>
-                <label for="melody1">Which melody would you like to use?</label>
-                <select id="melody1" name="melody1">
-                    <option>Use Default</option>
-                    <option>Generate a new one with Magenta</option>
-                </select>
-                <h3>Seed Melody 2</h3>
-                <label for="melody2">Which melody would you like to use?</label>
-                <select id="melody2" name="melody2">
-                    <option>Use Default</option>
-                    <option>Generate a new one with Magenta</option>
-                </select>
+
+                <div class="row">
+                    <div class="col2">
+                        <h3>Seed Melody 1</h3>
+                        <label for="melody1">Which melody would you like to use?</label>
+                        <select id="melody1" name="melody1">
+                            <option value="default">Use Default</option>
+                            <option value="rnn">Generate a new one with Magenta</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col2">    
+                        <h3>Seed Melody 2</h3>
+                        <label for="melody2">Which melody would you like to use?</label>
+                        <select id="melody2" name="melody2">
+                            <option value="default">Use Default</option>
+                            <option value="rnn">Generate a new one with Magenta</option>
+                        </select>
+                    </div>
+
+                </div>
+
                 <hr class="solid">
-                <button id="modalSendBtn">Send</button>
+                <div>
+                    <div class="dots">
+                        <div class="centerModal">
+                            <button id="modalSendBtn">Send</button> 
+                        </div>
+                        <div class="centerModal">
+                            <label id="melodyPrep" class="melodyPrepClass">Preparing<span>.</span><span>.</span><span>.</span></label>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
 
         </div>

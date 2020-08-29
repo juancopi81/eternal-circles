@@ -13,7 +13,10 @@ let tileSize;
 let discSize;
 const numInterpolations = 8;
 
+// Interpolated melodies
 let interpolatedMelodies;
+let generatedMelody1 = [];
+let generatedMelody2 = [];
 
 // Number of disc to play music
 const numDiscs = 4;
@@ -430,7 +433,29 @@ let melodiesVaeLoaded = melodiesVae.initialize();
 // Interpolate the given melodies 
 async function interpolateMelodies(callback) {
 	await melodiesVaeLoaded;
-	interpolatedMelodies = await melodiesVae.interpolate([presetMelodies['MELODY1'], presetMelodies['MELODY2']], numInterpolations);
+
+	let melody1;
+	let melody2;
+
+	// check if using default melodies
+	if (generatedMelody1.length === 0 && generatedMelody2.length === 0) {
+		melody1 = presetMelodies['MELODY1'];
+		melody2 = presetMelodies['MELODY2'];
+	} else if (generatedMelody2.length === 0) {
+		melody1 = generatedMelody1;
+		melody2 = presetMelodies['MELODY2'];
+	} else if (generatedMelody1.length === 0) {
+		melody1 = presetMelodies['MELODY1'];
+		melody2 = generatedMelody2;
+	} else {
+		melody1 = generatedMelody1;
+		melody2 = generatedMelody2;
+	}
+
+	// Interpolate melodies using MusicVAE
+	interpolatedMelodies = await melodiesVae.interpolate([melody1, melody2], numInterpolations);
+
+	// Callback 
 	callback();
 }
 
@@ -445,6 +470,47 @@ function melodiesReady() {
 
 interpolateMelodies(melodiesReady);
 
+// If user does not want to use default melodies, magenta generates them
+let checkPointRnn = 'https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/chord_pitches_improv'
+let melodyRnn = new music_rnn.MusicRNN(checkPointRnn);
+let melodyRnnLoaded = melodyRnn.initialize();
+
+async function generateMelody(note, duration, callback) {
+	await melodyRnnLoaded;
+
+	let seed = {
+		notes: [
+			{pitch: Tone.Frequency(note).toMidi(), quantizedStartStep: 0, quantizedEndStep: duration}
+		],
+		totalQuantizedSteps: duration,
+		quantizationInfo: {stepsPerQuarter: 4}
+	};
+
+	let steps = 32 - duration;
+	let temperature = 0.9;
+	let chordProgression = ['Cm7'];
+
+	let result = await melodyRnn.continueSequence(seed, steps, temperature, chordProgression);
+
+	let combined = core.sequences.concatenate([seed, result]);
+
+	callback();
+
+	return combined;
+}
+
+function generatingMelodies() {
+	document.getElementById('modalSendBtn').disabled = false;
+}
+
+// Callback function to use for waiting the response of settings
+function melodiesPreparing() {
+	if (melodyPrep.classList.contains('melodyPrepClassActive')) {
+		melodyPrep.classList.remove('melodyPrepClassActive');
+		melodyPrep.classList.add('melodyPrepClass');
+	};
+}
+
 // Javascript to handel the modal -> setting changed by the user
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -454,8 +520,51 @@ document.addEventListener('DOMContentLoaded', () => {
 	// Add event listener when button is clicked
 	let modalSendBtn = document.getElementById('modalSendBtn');
 
-	// When button is clicked
+	// Get selector of melodyes
+	var melody1Selector = document.getElementById('melody1');
+	var melody2Selector = document.getElementById('melody2');
+
+	melody1Selector.addEventListener('change', (event) => {
+		if (event.target.value == 'rnn') {
+			modalSendBtn.disabled = true;
+			generateMelody('C4', 2, generatingMelodies).then((result) => {
+				generatedMelody1 = result;
+			});
+		}
+	});
+
+	melody2Selector.addEventListener('change', (event) => {
+		if (event.target.value == 'rnn') {
+			modalSendBtn.disabled = true;
+			generateMelody('G5', 4, generatingMelodies).then((result) => {
+				generatedMelody2 = result;
+			});
+		}
+	});
+
+	// When button is clicked show loading message and process the request
+	modalSendBtn.addEventListener('mousedown', () => {
+
+		let melodyPrep = document.getElementById('melodyPrep');
+
+		document.body.className = 'waiting';
+
+		if (melodyPrep.classList.contains('melodyPrepClass')) {
+			melodyPrep.classList.remove('melodyPrepClass');
+			melodyPrep.classList.add('melodyPrepClassActive');
+		}
+	});
+
 	modalSendBtn.addEventListener('click', () => {
+
+		// Clear old melodies if using the defaults
+		if (document.getElementById('melody1').value == 'default') {
+			generatedMelody1 = [];
+		}
+
+		if (document.getElementById('melody2').value == 'default') {
+			generatedMelody2 = [];
+		}
 
 		// Loop over the values assigned to the discs
 		for (let i = 1; i < discs.length + 1; i++) {
@@ -486,12 +595,22 @@ document.addEventListener('DOMContentLoaded', () => {
 				samplerParts[i - 1].loop = true;
 				samplerParts[i - 1].loopStart = 0;
 				samplerParts[i - 1].loopEnd = '2m';
-
-			}
+			}	
 		}
 
-		// Hide modal menu
-		modal.style.display = "none";
+		callInterpolate();
+
+		melody1Selector.value = 'default';
+		melody2Selector.value = 'default';
+
 	});
+
+	function callInterpolate() {
+
+		let result = interpolateMelodies(melodiesPreparing).then(() => {
+			document.body.className = '';
+			modal.style.display = 'none';
+		});
+	};
 
 });
