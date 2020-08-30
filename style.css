@@ -166,12 +166,16 @@ i {
     float: left;
     width: 20%;
     padding: 10px;
+    padding-top: 0px;
+    margin-bottom: 10px;
 }
 
 .col2 {
     float: left;
     width: 40%;
     padding: 10px;
+    padding-top: 0px;
+    margin-bottom: 10px;
 } 
 
 /* Clear floats after the columns */
@@ -179,7 +183,7 @@ i {
     content: "";
     display: table;
     clear: both;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 body.waiting {
@@ -191,3 +195,22 @@ body.waiting {
     justify-content: center
 }
 
+.optionsHide {
+    display: none;
+}
+
+.optionsShow {
+    display: inline;
+}
+
+#accidental, #duration {
+    font-size: medium;
+}
+
+.col2 h3 {
+    margin-top: 0px;
+}
+
+.column h3 {
+    margin-top: 0px;
+}

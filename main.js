@@ -475,7 +475,7 @@ let checkPointRnn = 'https://storage.googleapis.com/magentadata/js/checkpoints/m
 let melodyRnn = new music_rnn.MusicRNN(checkPointRnn);
 let melodyRnnLoaded = melodyRnn.initialize();
 
-async function generateMelody(note, duration, callback) {
+async function generateMelody(note, duration, temperature, callback) {
 	await melodyRnnLoaded;
 
 	let seed = {
@@ -487,7 +487,6 @@ async function generateMelody(note, duration, callback) {
 	};
 
 	let steps = 32 - duration;
-	let temperature = 0.9;
 	let chordProgression = ['Cm7'];
 
 	let result = await melodyRnn.continueSequence(seed, steps, temperature, chordProgression);
@@ -495,6 +494,8 @@ async function generateMelody(note, duration, callback) {
 	let combined = core.sequences.concatenate([seed, result]);
 
 	callback();
+
+	console.log(combined);
 
 	return combined;
 }
@@ -509,6 +510,20 @@ function melodiesPreparing() {
 		melodyPrep.classList.remove('melodyPrepClassActive');
 		melodyPrep.classList.add('melodyPrepClass');
 	};
+
+	let seedOptions = document.getElementById('seedOptions1');
+	let seedOptions2 = document.getElementById('seedOptions2');
+
+	if (seedOptions.classList.contains('optionsShow')) {
+		seedOptions.classList.remove('optionsShow');
+		seedOptions.classList.add('optionsHide');
+	};
+
+	if (seedOptions2.classList.contains('optionsShow')) {
+		seedOptions2.classList.remove('optionsShow');
+		seedOptions2.classList.add('optionsHide');
+	};
+
 }
 
 // Javascript to handel the modal -> setting changed by the user
@@ -526,8 +541,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	melody1Selector.addEventListener('change', (event) => {
 		if (event.target.value == 'rnn') {
+			
+			let seedOptions = document.getElementById('seedOptions1');
+
+			if (seedOptions.classList.contains('optionsHide')) {
+				seedOptions.classList.remove('optionsHide');
+				seedOptions.classList.add('optionsShow');
+			}
+
+			let mNote = document.getElementById('pitch1').value;
+			let mTemperature = parseFloat(document.getElementById('temperature1').value);
+			let mDuration = parseInt(document.getElementById('duration1').value);
+
 			modalSendBtn.disabled = true;
-			generateMelody('C4', 2, generatingMelodies).then((result) => {
+			generateMelody(mNote, mDuration, mTemperature, generatingMelodies).then((result) => {
 				generatedMelody1 = result;
 			});
 		}
@@ -535,12 +562,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	melody2Selector.addEventListener('change', (event) => {
 		if (event.target.value == 'rnn') {
+
+			let seedOptions = document.getElementById('seedOptions2');
+
+			if (seedOptions.classList.contains('optionsHide')) {
+				seedOptions.classList.remove('optionsHide');
+				seedOptions.classList.add('optionsShow');
+			}
+
+			let mNote = document.getElementById('pitch2').value;
+			let mTemperature = parseFloat(document.getElementById('temperature2').value);
+			let mDuration = parseInt(document.getElementById('duration2').value);
+
 			modalSendBtn.disabled = true;
-			generateMelody('G5', 4, generatingMelodies).then((result) => {
+			generateMelody(mNote, mDuration, mTemperature, generatingMelodies).then((result) => {
 				generatedMelody2 = result;
 			});
 		}
 	});
+
+	// Add event listeners to change also in the seed options
+	let mNotes = [];
+	let mTemperatures = [];
+	let mDurations = [];
+	for (let i = 1; i < 3; i++) {
+		
+		// Get the elements
+		mTemperatures[i] = document.getElementById('temperature' + i);
+		mNotes[i] = document.getElementById('pitch' + i);
+		mDurations[i] = document.getElementById('duration' + i);
+
+
+		// Add listeners to each event and generate melodies
+		mTemperatures[i].addEventListener('change', (event) => {
+			modalSendBtn.disabled = true;
+			console.log(mNotes[i].value, parseInt(mDurations[i].value), parseFloat(mTemperatures[i].value));
+			generateMelody(mNotes[i].value, parseInt(mDurations[i].value), parseFloat(mTemperatures[i].value), generatingMelodies).then((result) => {
+				if (i === 1) {
+					generatedMelody1 = result;
+				} else {
+					generatedMelody2 = result;
+				}
+			});
+		});
+
+		mNotes[i].addEventListener('change', (event) => {
+			modalSendBtn.disabled = true;
+			generateMelody(mNotes[i].value, parseInt(mDurations[i].value), parseFloat(mTemperatures[i].value), generatingMelodies).then((result) => {
+				if (i === 1) {
+					generatedMelody1 = result;
+				} else {
+					generatedMelody2 = result;
+				}
+			});
+		}); 
+
+		mDurations[i].addEventListener('change', (event) => {
+			modalSendBtn.disabled = true;
+			generateMelody(mNotes[i].value, parseInt(mDurations[i].value), parseFloat(mTemperatures[i].value), generatingMelodies).then((result) => {
+				if (i === 1) {
+					generatedMelody1 = result;
+				} else {
+					generatedMelody2 = result;
+				}
+			});
+		});  
+	}
 
 	// When button is clicked show loading message and process the request
 	modalSendBtn.addEventListener('mousedown', () => {
@@ -602,6 +689,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		melody1Selector.value = 'default';
 		melody2Selector.value = 'default';
+
+		for (let i = 1; i < 3; i++) {
+			document.getElementById('temperature' + i).value = '0.9';
+		};
+
+		document.getElementById('duration1').value = '4';
+		document.getElementById('duration2').value = '2';
+
+		document.getElementById('pitch1').value = 'C4';
+		document.getElementById('pitch2').value = 'G5';
 
 	});
 

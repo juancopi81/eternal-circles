@@ -81,6 +81,8 @@
                         <h3>Disc 1</h3>
                         <span>Volume</span>
                         <input type="range" name="volumeDisc1" id="volumeDisc1" min="-60" max="0" value="0">
+                        <br>
+                        <br>
                         <label for="instrument1">Instrument</label>
                         <select id="instrument1" name="instrument1">
                             <option>Piano</option>
@@ -92,6 +94,8 @@
                         <h3>Disc 2</h3>
                         <span>Volume</span>
                         <input type="range" name="volumeDisc2" id="volumeDisc2" min="-60" max="0" value="0">
+                        <br>
+                        <br>
                         <label for="instrument2">Instrument</label>
                         <select id="instrument2" name="instrument2">
                             <option>Piano</option>
@@ -103,6 +107,8 @@
                         <h3>Disc 3</h3>
                         <span>Volume</span>
                         <input type="range" name="volumeDisc3" id="volumeDisc3" min="-60" max="0" value="0">
+                        <br>
+                        <br>
                         <label for="instrument3">Instrument</label>
                         <select id="instrument3" name="instrument3">
                             <option>Piano</option>
@@ -114,6 +120,8 @@
                         <h3>Disc 4</h3>
                         <span>Volume</span>
                         <input type="range" name="volumeDisc4" id="volumeDisc4" min="-60" max="0" value="0">
+                        <br>
+                        <br>
                         <label for="instrument4">Instrument</label>
                         <select id="instrument4" name="instrument1">
                             <option>Piano</option>
@@ -130,19 +138,113 @@
                     <div class="col2">
                         <h3>Seed Melody 1</h3>
                         <label for="melody1">Which melody would you like to use?</label>
+                        <br>
                         <select id="melody1" name="melody1">
                             <option value="default">Use Default</option>
                             <option value="rnn">Generate a new one with Magenta</option>
                         </select>
+
+                        <br>
+
+                        <!-- Select the seed options -->
+                        <div id="seedOptions1" class="optionsHide">
+
+                            <br>
+                            <label for="temperature">Temperature</label>
+                            <select name="temperature" id="temperature1">
+                                <option value="0.6">0.6</option>
+                                <option value="0.9" selected="selected">0.9</option>
+                                <option value="1.2">1.2</option>
+                                <option value="1.4">1.4</option>
+                            </select>
+                            <h4>Seed Note</h4>
+
+                            <p>
+                                <select name="pith" id="pitch1">
+                                    <option value="C4" selected="selected">C4</option>
+                                    <option value="C#4">C&#9839;4</option>
+                                    <option value="D4">D4</option>
+                                    <option value="D#4">D&#9839;4</option>
+                                    <option value="E4">E4</option>
+                                    <option value="F4">F4</option>
+                                    <option value="F#4">F&#9839;4</option>
+                                    <option value="G4">G4</option>
+                                    <option value="G#4">G&#9839;4</option>
+                                    <option value="A4">A4</option>
+                                    <option value="A#4">A&#9839;4</option>
+                                    <option value="B4">B4</option>
+                                    <option value="C5">C5</option>
+                                    <option value="C#5">C&#9839;5</option>
+                                    <option value="D5">D5</option>
+                                    <option value="D#5">D&#9839;5</option>
+                                </select>
+                                <select name="duration" id="duration1">
+                                    <option value="1">&#119137;</option>
+                                    <option value="2">&#119136;</option>
+                                    <option value="4" selected="selected">&#119135;</option>
+                                    <option value="8">&#119134;</option>
+                                    <option value="16">&#119133;</option>
+                                </select>
+                            </p>
+
+                        </div>
+
                     </div>
                     
                     <div class="col2">    
                         <h3>Seed Melody 2</h3>
                         <label for="melody2">Which melody would you like to use?</label>
+                        <br>
                         <select id="melody2" name="melody2">
                             <option value="default">Use Default</option>
                             <option value="rnn">Generate a new one with Magenta</option>
                         </select>
+
+                        <br>
+
+                        <!-- Select the see options -->
+                        <div id="seedOptions2" class="optionsHide">
+
+                            <br>
+                            <label for="temperature">Temperature</label>
+                            <select name="temperature" id="temperature2">
+                                <option value="0.6">0.6</option>
+                                <option value="0.9" selected="selected">0.9</option>
+                                <option value="1.2">1.2</option>
+                                <option value="1.4">1.4</option>
+                            </select>
+                            <h4>Seed Note</h4>
+
+                            <p>
+                                <select name="pith" id="pitch2">
+                                	<option value="G#4">G&#9839;4</option>
+                                    <option value="A4">A4</option>
+                                    <option value="A#4">A&#9839;4</option>
+                                    <option value="B4">B4</option>   
+                                    <option value="C5">C5</option>  
+                                    <option value="C#5">C&#9839;5</option>
+                                    <option value="D5">D5</option>
+                                    <option value="D#5">D&#9839;5</option>
+                                    <option value="E5">E5</option>
+                                    <option value="F5">F5</option>
+                                    <option value="F#5">F&#9839;5</option>
+                                    <option value="G5" selected="selected">G5</option>
+                                    <option value="G#5">G&#9839;5</option>
+                                    <option value="A5">A4</option>
+                                    <option value="A#5">A&#9839;5</option>
+                                    <option value="B5">B5</option>                                                   
+                                </select>
+                                <select name="duration" id="duration2">
+                                    <option value="1">&#119137;</option>
+                                    <option value="2" selected="selected">&#119136;</option>
+                                    <option value="4">&#119135;</option>
+                                    <option value="8">&#119134;</option>
+                                    <option value="16">&#119133;</option>
+                                </select>
+                            </p>
+
+                        </div>
+
                     </div>
 
                 </div>
